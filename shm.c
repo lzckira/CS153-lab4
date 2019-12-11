@@ -38,6 +38,7 @@ int shm_open(int id, char **pointer) {
 	  if (shm_table.shm_pages[i].id == id) {
 		  shm_table.shm_pages[i].refcnt = 1;
 	  }
+// lab4, case 2
 	  else {
 		  shm_table.shm_pages[i].id = id;
 		  shm_table.shm_pages[i].frame = kalloc();  
@@ -55,13 +56,14 @@ return 0;
 
 int shm_close(int id) {
    int i;
+   int tempRef;
    acquire(&(shm_table.lock));
    for (i = 0; i < 64; i++) {
        if (shm_table.shm_pages[i].id == id) {
            shm_table.shm_pages[i].refcnt--;
-	   }
-	   int temp = --shm_table.shm_pages[i].refcnt;
-       if (temp == 0) {
+       }
+       tempRef = --shm_table.shm_pages[i].refcnt;
+       if (tempRef == 0) {
             shm_table.shm_pages[i].frame = 0;
             shm_table.shm_pages[i].id = 0;
        }
