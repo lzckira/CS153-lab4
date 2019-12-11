@@ -32,17 +32,18 @@ int shm_open(int id, char **pointer) {
   int i;
   acquire(&(shm_table.lock));
   struct proc *curproc = myproc();
+
 // lab4, case 1
   for (i = 0; i < 64; i++) {
 	  char* va = (char*)PGROUNDUP(curproc->sz);
 	  if (shm_table.shm_pages[i].id == id) {
-		  shm_table.shm_pages[i].refcnt = 1;
+		  shm_table.shm_pages[i].refcnt++;
 	  }
 // lab4, case 2
 	  else {
 		  shm_table.shm_pages[i].id = id;
 		  shm_table.shm_pages[i].frame = kalloc();  
-		  shm_table.shm_pages[i].refcnt++;
+		  shm_table.shm_pages[i].refcnt=1;
 		  memset(shm_table.shm_pages[i].frame, 0, PGSIZE);		
 	  }
 	  mappages(curproc->pgdir, va, PGSIZE, V2P(shm_table.shm_pages[i].frame), PTE_W|PTE_U);
@@ -55,8 +56,9 @@ return 0;
 
 
 int shm_close(int id) {
-   int i;
    int tempRef;
+   int i;
+
    acquire(&(shm_table.lock));
    for (i = 0; i < 64; i++) {
        if (shm_table.shm_pages[i].id == id) {
